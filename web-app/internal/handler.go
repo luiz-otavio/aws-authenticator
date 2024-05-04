@@ -163,11 +163,6 @@ func (handler authHandler) Handle(ctx context.Context, event *events.APIGatewayP
 			Body:       NewUnexpectedError(nil, "invalid method").String(),
 		}, nil
 	}
-
-	return &events.APIGatewayProxyResponse{
-		StatusCode: 500,
-		Body:       NewUnexpectedError(nil, "unexpected error").String(),
-	}, nil
 }
 
 func (authHandler authHandler) Login(ctx context.Context, request UserRequestLoginSchema) (UserResponseLoginSchema, error) {
