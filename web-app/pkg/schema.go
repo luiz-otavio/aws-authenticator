@@ -1,9 +1,27 @@
 package pkg
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/rs/zerolog/log"
+)
 
 type HttpSchema struct {
 	CommitedAt time.Time `json:"commited_at"`
+}
+
+func (schema HttpSchema) String() string {
+	body, err := json.Marshal(schema)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to marshal http schema")
+
+		return ""
+	}
+
+	return string(body)
 }
 
 type UserRequestLoginSchema struct {
