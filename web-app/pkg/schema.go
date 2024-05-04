@@ -8,6 +8,7 @@ import (
 )
 
 type HttpSchema struct {
+	StatusCode int       `json:"status_code"`
 	CommitedAt time.Time `json:"commited_at"`
 }
 
@@ -25,8 +26,6 @@ func (schema HttpSchema) String() string {
 }
 
 type UserRequestLoginSchema struct {
-	HttpSchema
-
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -38,8 +37,6 @@ type UserResponseLoginSchema struct {
 }
 
 type UserChangePasswordRequestSchema struct {
-	HttpSchema
-
 	Username    string `json:"username"`
 	OldPassword string `json:"password"`
 	NewPassword string `json:"new_password"`
@@ -52,8 +49,6 @@ type UserChangePasswordResponseSchema struct {
 }
 
 type UserRegisterRequestSchema struct {
-	HttpSchema
-
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -65,8 +60,6 @@ type UserRegisterResponseSchema struct {
 }
 
 type ExistsUserRequestSchema struct {
-	HttpSchema
-
 	Username string `json:"username"`
 }
 
