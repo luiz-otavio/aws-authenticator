@@ -295,9 +295,161 @@ func (authHandler authHandler) Register(ctx context.Context, request UserRegiste
 }
 
 func (handler authHandler) ChangePassword(ctx context.Context, request UserChangePasswordRequestSchema) (UserChangePasswordResponseSchema, error) {
-	return UserChangePasswordResponseSchema{}, nil
+	database := handler.Database
+
+	if exists, err := handler.Exists(ctx, ExistsUserRequestSchema{Username: request.Username}); err != nil {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to check if user exists",
+		}, err
+	} else if exists.StatusCode != 200 {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 404,
+				CommitedAt: time.Now(),
+			},
+			Message: "user not found",
+		}, errors.New("user not found")
+	}
+
+	var targetUser user
+	output, err := database.DB().GetItemWithContext(ctx, &dynamodb.GetItemInput{
+		TableName: database.TableName(),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: &request.Username,
+			},
+		},
+	})
+
+	if err != nil {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to get item",
+		}, err
+	}
+
+	if err := dynamodbattribute.UnmarshalMap(output.Item, &targetUser); err != nil {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to unmarshal item",
+		}, err
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.OldPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to hash password",
+		}, err
+	}
+
+	if !targetUser.Compare(hashedPassword) {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 401,
+				CommitedAt: time.Now(),
+			},
+			Message: "invalid password",
+		}, errors.New("invalid password")
+	}
+
+	hashedPassword, err = bcrypt.GenerateFromPassword([]byte(request.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to hash password",
+		}, err
+	}
+
+	item, err := dynamodbattribute.MarshalMap(user{
+		username: request.Username,
+		password: hashedPassword,
+	})
+
+	if err != nil {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to marshal item",
+		}, err
+	}
+
+	if _, err := database.DB().PutItemWithContext(ctx, &dynamodb.PutItemInput{
+		TableName: database.TableName(),
+		Item:      item,
+	}); err != nil {
+		return UserChangePasswordResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to put item",
+		}, err
+	}
+
+	return UserChangePasswordResponseSchema{
+		HttpSchema: HttpSchema{
+			StatusCode: 200,
+			CommitedAt: time.Now(),
+		},
+	}, nil
 }
 
 func (handler authHandler) Exists(ctx context.Context, request ExistsUserRequestSchema) (ExistsUserResponseSchema, error) {
-	return ExistsUserResponseSchema{}, nil
+	database := handler.Database
+
+	output, err := database.DB().GetItemWithContext(ctx, &dynamodb.GetItemInput{
+		TableName: database.TableName(),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: &request.Username,
+			},
+		},
+	})
+
+	if err != nil {
+		return ExistsUserResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 500,
+				CommitedAt: time.Now(),
+			},
+			Message: "failed to get item",
+		}, err
+	}
+
+	if len(output.Item) == 0 {
+		return ExistsUserResponseSchema{
+			HttpSchema: HttpSchema{
+				StatusCode: 404,
+				CommitedAt: time.Now(),
+			},
+			Message: "user not found",
+		}, nil
+	}
+
+	return ExistsUserResponseSchema{
+		HttpSchema: HttpSchema{
+			StatusCode: 200,
+			CommitedAt: time.Now(),
+		},
+		Message: "user found",
+	}, nil
 }
