@@ -16,3 +16,8 @@ type AuthRouter interface {
 type AuthHandler interface {
 	Handle(context.Context, *events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error)
 }
+
+type Authenticator interface {
+	AuthRouter
+	AuthHandler
+}

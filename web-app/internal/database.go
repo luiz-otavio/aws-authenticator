@@ -12,9 +12,8 @@ import (
 )
 
 type database struct {
-	Database
-
-	_db *dynamodb.DynamoDB
+	_tableName *string
+	_db        *dynamodb.DynamoDB
 }
 
 func Init(credentials *credentials.Credentials, region *string, tableName *string) (Database, error) {
@@ -47,9 +46,13 @@ func Init(credentials *credentials.Credentials, region *string, tableName *strin
 		Time("Time", time.Now()).
 		Msg("DynamoDB Service Name: " + db.ServiceName)
 
-	return database{_db: db}, nil
+	return database{_tableName: tableName, _db: db}, nil
 }
 
 func (impl database) DB() *dynamodb.DynamoDB {
 	return impl._db
+}
+
+func (impl database) TableName() *string {
+	return impl._tableName
 }

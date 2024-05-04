@@ -1,14 +1,31 @@
 package pkg
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/rs/zerolog/log"
+)
 
 type HttpSchema struct {
+	StatusCode int       `json:"status_code"`
 	CommitedAt time.Time `json:"commited_at"`
 }
 
-type UserRequestLoginSchema struct {
-	HttpSchema
+func (schema HttpSchema) String() string {
+	body, err := json.Marshal(schema)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("failed to marshal http schema")
 
+		return ""
+	}
+
+	return string(body)
+}
+
+type UserRequestLoginSchema struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -20,8 +37,6 @@ type UserResponseLoginSchema struct {
 }
 
 type UserChangePasswordRequestSchema struct {
-	HttpSchema
-
 	Username    string `json:"username"`
 	OldPassword string `json:"password"`
 	NewPassword string `json:"new_password"`
@@ -34,8 +49,6 @@ type UserChangePasswordResponseSchema struct {
 }
 
 type UserRegisterRequestSchema struct {
-	HttpSchema
-
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -47,8 +60,6 @@ type UserRegisterResponseSchema struct {
 }
 
 type ExistsUserRequestSchema struct {
-	HttpSchema
-
 	Username string `json:"username"`
 }
 
