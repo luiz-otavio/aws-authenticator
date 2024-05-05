@@ -7,12 +7,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type UnexpetechedError struct {
+type UnexpectedError struct {
 	Err     error  `json:"error"`
 	Message string `json:"message"`
 }
 
-func (e UnexpetechedError) String() string {
+func (e UnexpectedError) String() string {
 	marshaled, err := json.Marshal(e)
 	if err != nil {
 		log.Error().
@@ -25,6 +25,6 @@ func (e UnexpetechedError) String() string {
 	return string(marshaled)
 }
 
-func NewUnexpectedError(err error, message string) UnexpetechedError {
-	return UnexpetechedError{Err: err, Message: message}
+func NewUnexpectedError(err error, message string) UnexpectedError {
+	return UnexpectedError{Err: err, Message: message}
 }
