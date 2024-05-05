@@ -61,7 +61,7 @@ func (impl registerHandler) Register(ctx context.Context, request UserRegisterRe
 	if err != nil {
 		return UserRegisterResponseSchema{
 			HttpSchema: HttpSchema{
-				StatusCode: 500,
+				StatusCode: http.StatusInternalServerError,
 				CommitedAt: time.Now(),
 			},
 			Message: "failed to get item",
