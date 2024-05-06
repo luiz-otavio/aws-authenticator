@@ -6,10 +6,23 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
-type AuthRouter interface {
+type LoginRouter interface {
+	AuthHandler
 	Login(context.Context, UserRequestLoginSchema) (UserResponseLoginSchema, error)
+}
+
+type RegisterRouter interface {
+	AuthHandler
 	Register(context.Context, UserRegisterRequestSchema) (UserRegisterResponseSchema, error)
+}
+
+type ChangePasswordRouter interface {
+	AuthHandler
 	ChangePassword(context.Context, UserChangePasswordRequestSchema) (UserChangePasswordResponseSchema, error)
+}
+
+type ExistsRouter interface {
+	AuthHandler
 	Exists(context.Context, ExistsUserRequestSchema) (ExistsUserResponseSchema, error)
 }
 
@@ -18,6 +31,5 @@ type AuthHandler interface {
 }
 
 type Authenticator interface {
-	AuthRouter
 	AuthHandler
 }
