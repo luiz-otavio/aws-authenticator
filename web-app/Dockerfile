@@ -13,7 +13,6 @@ FROM alpine:3.14
 
 WORKDIR /app
 
-
 COPY --from=build ./aws-authenticator .
 
 ARG DYNAMODB_REGION=eu-central-2
