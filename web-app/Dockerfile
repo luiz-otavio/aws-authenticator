@@ -9,7 +9,7 @@ COPY . .
 RUN go install github.com/goreleaser/goreleaser@latest
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=$DIST_TARGET goreleaser build --rm-dist --snapshot --verbose --single-target --output .
 
-FROM alpine:3.14
+FROM debian:12
 
 WORKDIR /app
 
