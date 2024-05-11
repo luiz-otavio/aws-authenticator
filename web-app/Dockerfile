@@ -13,6 +13,9 @@ FROM alpine:3.14
 
 WORKDIR /app
 
+
+COPY --from=build ./aws-authenticator .
+
 ARG DYNAMODB_REGION=eu-central-2
 ARG DYNAMODB_TABLE_NAME=authenticator
 ARG APP_ROUTER=LOGIN
